@@ -1,0 +1,7 @@
+.letter {
+
+    margin: 4px
+}
+
+.letterUnmatched{background: rgb(247, 52, 52);}
+.letterMatched{background: #27c918;}
