@@ -10,15 +10,21 @@ import './App.css';
 const letters_ok ="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const letters = letters_ok.split('')
 const word = ['cheval', 'velo', 'tartiflette']
+const nbChance = 4
 
 class App extends Component{
-  state = {
-    wordToFind : this.randomWord(),
-    unmatchedLetters: [],
-    matchedLetters : [],
-    guesses : 0,
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      wordToFind : this.randomWord(),
+      unmatchedLetters: [],
+      matchedLetters : [],
+      guesses : 0,
+      score : 0, 
+      gamePlayed : 0,    
+    }
   }
-  
   
   randomWord(){
     const newWord = word[Math.floor(Math.random()*word.length)]
@@ -34,14 +40,15 @@ class App extends Component{
   }
 
   handleLetterClick = letter => {
-    const { matchedLetters, unmatchedLetters, guesses } = this.state
+    const { matchedLetters, unmatchedLetters, guesses, score } = this.state
     const lettersToFind = this.lettersToFind()
-    console.log(!matchedLetters.includes(letter))
+
+    const newScore = (( matchedLetters.length + 1 ) === lettersToFind.length ) ? score + 1 : score 
+
     
-    if( lettersToFind.length === matchedLetters.length ){
-      console.log('Win !!!')
-      return
-    }
+    this.setState({ 
+      score : newScore,
+    })
 
     if(lettersToFind.includes(letter)){
       matchedLetters.push(letter)
@@ -55,9 +62,7 @@ class App extends Component{
       }
       return
     }
-
   }
-
 
   getFeedbackForLetter(letter) {
     const { matchedLetters, unmatchedLetters } = this.state
@@ -72,9 +77,10 @@ class App extends Component{
     return 'unTested'
   }
 
-
-  computeDisplay(phrase, matchedLetters) {
-    return phrase.replace(/\w/g,    (letter) => (matchedLetters.includes(letter) ? letter : '_'))
+  computeDisplay(phrase, matchedLetters, guesses ) {     
+    if (guesses < nbChance) {
+      return phrase.replace(/\w/g,    (letter) => (matchedLetters.includes(letter) ? letter : '_'))
+    }
   }
 
   imageSource(guesses){
@@ -92,33 +98,64 @@ class App extends Component{
     }
   }
 
+  reinitGame(){
+    this.setState({
+      wordToFind : this.randomWord(),
+      unmatchedLetters: [],
+      matchedLetters : [],
+      guesses : 0,         
+    })
+  }
+
   etatJeux(){
-    const { matchedLetters, guesses } = this.state
+    const { matchedLetters, guesses, wordToFind } = this.state
+    const newGameButton = (
+      <button className="btn btn-primary btn-lg" onClick={()=>this.reinitGame()}>
+        Nouvelle partie 
+      </button>
+    )
 
     if (matchedLetters.length === this.lettersToFind().length) {
-      return <span>Gagné !!!!</span>
+      return (
+        <div>
+          <h2>Gagné !!!!</h2>
+          <p>Vous remportez la partie avec seulement <strong>{guesses} erreur(s)</strong></p>
+          {newGameButton}
+        </div>
+      )
     }
     
-    if ( guesses > 3) {
-      return  <span>Perdu !!!!</span>
+    if ( guesses > nbChance - 1) {
+      return (
+        <div>
+          <h2>Perdu !!!!</h2>
+          <p>Le mot recherché était <strong>{wordToFind}</strong></p>
+          {newGameButton}
+        </div>
+      )
     }
   }
 
+
+  gameScore(){
+      const { score, gamePlayed } = this.state
+      return ( <span>score : {score} / {gamePlayed}</span> )
+  }
+
   render(){
-    const {wordToFind, matchedLetters, guesses } = this.state
-    const displayWord = this.computeDisplay(wordToFind, matchedLetters)
+    const { wordToFind, matchedLetters, guesses } = this.state
+    const displayWord = this.computeDisplay( wordToFind, matchedLetters, guesses )
     const imageName = this.imageSource( guesses )
 
     return(
       <div>
         <div className="col-md-8  mx-auto text-center">
           <section className="jumbotron text-center">
+            <div>{ this.gameScore()  }</div>
             <div className="container">
               <img src={ imageName } alt="Pendu" className="pendu" />
               <h1 className="jumbotron-heading">{ displayWord }</h1>
-              <p>{ this.etatJeux()  }</p>
-
-
+              <div>{ this.etatJeux()  }</div>
             </div>
           </section>
         </div>
