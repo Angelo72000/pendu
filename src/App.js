@@ -1,90 +1,133 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
+import keydown from 'react-keydown';
 import KeyBoard from './KeyBoard';
+
+import './App.css';
 import pendu0 from './img/pendu0.png';
 import pendu1 from './img/pendu1.png';
 import pendu2 from './img/pendu2.png';
 import pendu3 from './img/pendu3.png';
 import pendu4 from './img/pendu4.png';
-import './App.css';
 
-const letters_ok ="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const letters = letters_ok.split('')
-const word = ['cheval', 'velo', 'tartiflette']
-const nbChance = 4
+const lettersAllowed = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+
+const tabLetters = lettersAllowed.split('')
+const wordsListe = ['test', 'velo', 'tralala']
+const maxMissed = 4
+const numberOfGames = 0
+const allowedInput = [
+  {id : 65, name : 'A'},
+  {id : 66, name : 'B'},
+  {id : 67, name : 'C'},
+  {id : 68, name : 'D'},
+  {id : 69, name : 'E'},
+  {id : 70, name : 'F'},
+  {id : 71, name : 'G'},
+  {id : 72, name : 'H'},
+  {id : 73, name : 'I'},
+  {id : 74, name : 'J'},
+  {id : 75, name : 'K'},
+  {id : 76, name : 'L'},
+  {id : 77, name : 'M'},
+  {id : 78, name : 'N'},
+  {id : 79, name : 'O'},
+  {id : 80, name : 'P'},
+  {id : 81, name : 'Q'},
+  {id : 82, name : 'R'},
+  {id : 83, name : 'S'},
+  {id : 84, name : 'T'},
+  {id : 85, name : 'U'},
+  {id : 86, name : 'V'},
+  {id : 87, name : 'W'},
+  {id : 88, name : 'X'},
+  {id : 89, name : 'Y'},
+  {id : 90, name : 'Z'},
+  {id : 13, name : 'enter'},
+  {id : 27, name : 'escape'},
+  ]
 
 class App extends Component{
-
-  constructor(props) {
+  constructor(props){
     super(props)
+    this.numberOfGames = numberOfGames
+    this.gameInProgress = true
+    this.handleKeyPress = this.handleKeyPress.bind(this);
     this.state = {
-      wordToFind : this.randomWord(),
-      unmatchedLetters: [],
+      searchedWord : '',
+      lettersToFind : [],
       matchedLetters : [],
-      guesses : 0,
-      score : 0, 
-      gamePlayed : 0,    
+      unmatchedLetters : [],
+      score : 0,
+      missed : 0,
+      currentKey: '',
     }
+  }
+
+  handleKeyPress(e) {
+    const { matchedLetters, unmatchedLetters, lettersToFind, missed, score } = this.state
+    const newScore = (( matchedLetters.length + 1 ) === lettersToFind.length ) ? score + 1 : score 
+    const pressedKey = e.key.toUpperCase()
+
+
+       allowedInput.map((props) =>{
+        if((e.keyCode === props.id)){
+
+          if ((props.name === 'enter') || (props.name === 'escape') && !this.gameInProgress) {
+            this.gameInProgress = true
+            this.newGame()
+            return 
+          }
+          
+    
+    
+          // si une partie est en cours
+          if (this.gameInProgress) {
+            
+            // si le tableau de lettre à trouver contient la lettre saisie
+            if(lettersToFind.includes(pressedKey)){
+              matchedLetters.push(pressedKey)
+              this.setState({ 
+                matchedLetters : matchedLetters,
+                score : newScore,
+                currentKey: pressedKey,
+              })
+              
+              return
+              
+              // si la lettre saisie n'est ni dans le tableau de lettres à trouver 
+              // ni dans le tableau de lettres déjà saisie 
+            }else{
+              
+              if(!matchedLetters.includes(pressedKey) && !unmatchedLetters.includes(pressedKey) && (e.keyCode != 13)){
+                unmatchedLetters.push(pressedKey)
+                this.setState({ 
+                  unmatchedLetters : unmatchedLetters, 
+                  missed : missed + 1,
+                  score : newScore,
+                  currentKey: pressedKey,
+                })
+              }
+            }             
+          }
+
+
+
+        }
+      })    
+
+  }
+
+  componentDidMount() {
+    document.addEventListener('keydown', this.handleKeyPress);
   }
   
-  randomWord(){
-    const newWord = word[Math.floor(Math.random()*word.length)]
-    const wordToFind = newWord.toUpperCase().slice()
-    return wordToFind
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleKeyPress);
   }
 
-  lettersToFind(){
-    const { wordToFind } = this.state
-    const lettersToFind = new Set(wordToFind)
-    const arrayUniqueLetters = [...lettersToFind] 
-    return arrayUniqueLetters
-  }
-
-  handleLetterClick = letter => {
-    const { matchedLetters, unmatchedLetters, guesses, score } = this.state
-    const lettersToFind = this.lettersToFind()
-
-    const newScore = (( matchedLetters.length + 1 ) === lettersToFind.length ) ? score + 1 : score 
-
-    
-    this.setState({ 
-      score : newScore,
-    })
-
-    if(lettersToFind.includes(letter)){
-      matchedLetters.push(letter)
-      this.setState({ matchedLetters : matchedLetters })
-      return
-
-    }else{
-      if(!matchedLetters.includes(letter) || !unmatchedLetters.includes(letter)){
-        unmatchedLetters.push(letter)
-        this.setState({ unmatchedLetters : unmatchedLetters, guesses : guesses + 1 })
-      }
-      return
-    }
-  }
-
-  getFeedbackForLetter(letter) {
-    const { matchedLetters, unmatchedLetters } = this.state
-
-    if(matchedLetters.includes(letter)){
-      return 'letterMatched'
-
-    }else if(unmatchedLetters.includes(letter)){
-      return 'letterUnmatched'
-    }
-
-    return 'unTested'
-  }
-
-  computeDisplay(phrase, matchedLetters, guesses ) {     
-    if (guesses < nbChance) {
-      return phrase.replace(/\w/g,    (letter) => (matchedLetters.includes(letter) ? letter : '_'))
-    }
-  }
-
-  imageSource(guesses){
-    switch (guesses) {
+  updateImageSrc(missed){
+    switch (missed) {
       case 1: return pendu1
         break;
       case 2: return pendu2
@@ -98,84 +141,152 @@ class App extends Component{
     }
   }
 
-  reinitGame(){
+  selectRandomWord(){
+    const newWord = wordsListe[Math.floor(Math.random()*wordsListe.length)]
+    const searchedWord = newWord.toUpperCase().slice()
+    return searchedWord
+  }
+
+  tabLettersToFindInWordSelected(searchedWord){
+    const lettersToFind = new Set(searchedWord)
+    const arrayUniqueLetters = [...lettersToFind] 
+    return arrayUniqueLetters
+  }
+
+  getFeedbackForLetter(letter) {
+    const { matchedLetters, unmatchedLetters } = this.state
+
+    if(matchedLetters.includes(letter)){
+      return 'letterMatched'
+
+    }else if(unmatchedLetters.includes(letter)){
+      return 'letterUnmatched'
+    }
+  }
+  
+  letterClick = letter => {
+    const { matchedLetters, unmatchedLetters, lettersToFind, missed, score } = this.state
+    const newScore = (( matchedLetters.length + 1 ) === lettersToFind.length ) ? score + 1 : score 
+
+    if(lettersToFind.includes(letter)){
+      matchedLetters.push(letter)
+      this.setState({ 
+        matchedLetters : matchedLetters,
+        score : newScore,
+      })
+      return
+
+    }else{
+      if(!matchedLetters.includes(letter) && !unmatchedLetters.includes(letter)){
+        unmatchedLetters.push(letter)
+        this.setState({ 
+          unmatchedLetters : unmatchedLetters, 
+          missed : missed + 1,
+          score : newScore,
+        })
+      }
+    }
+  }
+
+  computeDisplay(phrase, matchedLetters, missed ) {     
+    if (missed < maxMissed) {
+      return phrase.replace(/\w/g,  (letter) => (matchedLetters.includes(letter) ? letter : '_'))
+    }
+  }
+
+  newGame(){
+    this.gameInProgress = true
+    const searchedWord = this.selectRandomWord()
+    const lettersToFind = this.tabLettersToFindInWordSelected(searchedWord)
+    this.numberOfGames = this.numberOfGames + 1
     this.setState({
-      wordToFind : this.randomWord(),
+      searchedWord : searchedWord,
+      lettersToFind : lettersToFind,
       unmatchedLetters: [],
       matchedLetters : [],
-      guesses : 0,         
+      missed : 0,       
     })
   }
 
-  etatJeux(){
-    const { matchedLetters, guesses, wordToFind } = this.state
+  statusGame(){
+    const { matchedLetters, missed, searchedWord, lettersToFind } = this.state
+
     const newGameButton = (
-      <button className="btn btn-primary btn-lg" onClick={()=>this.reinitGame()}>
-        Nouvelle partie 
+      <button className="btn btn-primary btn-lg" onClick={()=>this.newGame()}>
+        Nouvelle partie ou appuie sur 'Entrer'
       </button>
     )
 
-    if (matchedLetters.length === this.lettersToFind().length) {
-      return (
-        <div>
-          <h2>Gagné !!!!</h2>
-          <p>Vous remportez la partie avec seulement <strong>{guesses} erreur(s)</strong></p>
-          {newGameButton}
-        </div>
-      )
-    }
-    
-    if ( guesses > nbChance - 1) {
-      return (
-        <div>
-          <h2>Perdu !!!!</h2>
-          <p>Le mot recherché était <strong>{wordToFind}</strong></p>
-          {newGameButton}
-        </div>
-      )
-    }
-  }
-
-
-  gameScore(){
-      const { score, gamePlayed } = this.state
-      return ( <span>score : {score} / {gamePlayed}</span> )
-  }
-
-  render(){
-    const { wordToFind, matchedLetters, guesses } = this.state
-    const displayWord = this.computeDisplay( wordToFind, matchedLetters, guesses )
-    const imageName = this.imageSource( guesses )
-
-    return(
+    const win = (
       <div>
-        <div className="col-md-8  mx-auto text-center">
-          <section className="jumbotron text-center">
-            <div>{ this.gameScore()  }</div>
-            <div className="container">
-              <img src={ imageName } alt="Pendu" className="pendu" />
-              <h1 className="jumbotron-heading">{ displayWord }</h1>
-              <div>{ this.etatJeux()  }</div>
-            </div>
-          </section>
-        </div>
-        <div className="col-md-8  mx-auto text-center">
-          { 
-            letters.map((letter, index) => (
-              <KeyBoard
-                letter={letter}
-                feedback={this.getFeedbackForLetter(letter)}
-                key={index}
-                onClick={this.handleLetterClick}
-              />
-            ))
-          }
-        </div>
+        <h2>Gagné !!!!</h2>
+        <p>Vous remportez la partie avec seulement <strong>{missed} erreur(s)</strong></p>
+        {newGameButton}
       </div>
     )
 
+    const loose = (
+      <div>
+        <h2>Perdu !!!!</h2>
+        <p>Le mot recherché était <strong>{searchedWord}</strong></p>
+        {newGameButton}
+      </div>      
+    )    
+
+    if ((matchedLetters.length === lettersToFind.length) && searchedWord !='') {
+      this.gameInProgress = false
+      return win
+    }
+    
+    if ( missed > maxMissed - 1) {
+      this.gameInProgress = false
+      return loose
+    }
   }
 
+  render(){
+    const { searchedWord, matchedLetters, missed, score } = this.state
+    const displayWord = this.computeDisplay( searchedWord, matchedLetters, missed )
+    const imageName = this.updateImageSrc( missed )
+
+    const displayScore = (!this.gameInProgress) ? (<span>Partie en cours !</span>) : ( <span>score : {score} / {this.numberOfGames}</span> )
+
+    if(this.numberOfGames === 0){
+      this.newGame(wordsListe)
+    } 
+    return(
+      <div>
+          <div className="col-md-7  mx-auto text-center">
+            {/* <div>Mot à trouver {searchedWord} { this.displayScore()  }</div> */}
+            <div>{ displayScore  }</div>
+          </div>
+
+          <div className="col-md-7  mx-auto text-center">
+            <section className="jumbotron text-center">
+              <div className="container">
+                <img src={ imageName } alt="Pendu" className="pendu" />
+                <h1 className="jumbotron-heading">{ displayWord }</h1>
+                <div>{ this.statusGame()  }</div>
+              </div>
+            </section>
+          </div>
+            
+          <div className="col-md-7  mx-auto text-center">
+            { 
+              tabLetters.map((letter, index) => (
+                <KeyBoard
+                  letter={letter}
+                  feedback={this.getFeedbackForLetter(letter)}
+                  key={index}
+                  onClick={this.letterClick}
+                />
+              ))
+            }
+          </div>
+      </div>
+      
+    )
+  }
 }
 
 export default App;
