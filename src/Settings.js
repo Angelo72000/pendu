@@ -1,4 +1,6 @@
-const WordsList = [
+export const lettersAllowed = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+export const WordsList = [
     'aide',
     'chef',
     'enfant',
@@ -240,4 +242,35 @@ const WordsList = [
     'voyage',
     'fils',
     'gens']
-export default WordsList
+
+export const allowedInput = [
+    {id : 65, name : 'A'},
+    {id : 66, name : 'B'},
+    {id : 67, name : 'C'},
+    {id : 68, name : 'D'},
+    {id : 69, name : 'E'},
+    {id : 70, name : 'F'},
+    {id : 71, name : 'G'},
+    {id : 72, name : 'H'},
+    {id : 73, name : 'I'},
+    {id : 74, name : 'J'},
+    {id : 75, name : 'K'},
+    {id : 76, name : 'L'},
+    {id : 77, name : 'M'},
+    {id : 78, name : 'N'},
+    {id : 79, name : 'O'},
+    {id : 80, name : 'P'},
+    {id : 81, name : 'Q'},
+    {id : 82, name : 'R'},
+    {id : 83, name : 'S'},
+    {id : 84, name : 'T'},
+    {id : 85, name : 'U'},
+    {id : 86, name : 'V'},
+    {id : 87, name : 'W'},
+    {id : 88, name : 'X'},
+    {id : 89, name : 'Y'},
+    {id : 90, name : 'Z'},
+    {id : 13, name : 'enter'},
+    {id : 27, name : 'escape'},
+    ]
+

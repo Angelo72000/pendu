@@ -1,44 +1,14 @@
 import React, {Component} from 'react';
 import KeyBoard from './KeyBoard';
 import DisplayGame from './DisplayGame';
-import WordsList from './WordsList';
+import { lettersAllowed, WordsList, allowedInput } from './Settings';
 
 import './App.css';
 
-const lettersAllowed = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const tabLetters = lettersAllowed.split('')
 const maxMissed = 4
 const numberOfGames = 0
-const allowedInput = [
-  {id : 65, name : 'A'},
-  {id : 66, name : 'B'},
-  {id : 67, name : 'C'},
-  {id : 68, name : 'D'},
-  {id : 69, name : 'E'},
-  {id : 70, name : 'F'},
-  {id : 71, name : 'G'},
-  {id : 72, name : 'H'},
-  {id : 73, name : 'I'},
-  {id : 74, name : 'J'},
-  {id : 75, name : 'K'},
-  {id : 76, name : 'L'},
-  {id : 77, name : 'M'},
-  {id : 78, name : 'N'},
-  {id : 79, name : 'O'},
-  {id : 80, name : 'P'},
-  {id : 81, name : 'Q'},
-  {id : 82, name : 'R'},
-  {id : 83, name : 'S'},
-  {id : 84, name : 'T'},
-  {id : 85, name : 'U'},
-  {id : 86, name : 'V'},
-  {id : 87, name : 'W'},
-  {id : 88, name : 'X'},
-  {id : 89, name : 'Y'},
-  {id : 90, name : 'Z'},
-  {id : 13, name : 'enter'},
-  {id : 27, name : 'escape'},
-  ]
+
 
 class App extends Component{
   constructor(props){
@@ -98,7 +68,6 @@ class App extends Component{
           if (pressEscapeOrEnter && !this.gameInProgress) {
             this.gameInProgress = true
             this.newGame()
-            return 
           }
           
           // On vérifie si la partie est toujours en cours et si le tableau de lettre à trouver contient la lettre saisie et on met à jour l'état du jeu
@@ -110,7 +79,6 @@ class App extends Component{
                 score : newScore,
                 currentKey: pressedKey,
               })
-              return
               
             }else{
               // si la lettre saisie n'est ni dans le tableau de lettres à trouver ni dans le tableau de lettres déjà saisie 
@@ -126,6 +94,7 @@ class App extends Component{
             }             
           }
         }
+        return false // Ne retourne rien
       })// Fin de map allowedInput
 
   }
@@ -166,6 +135,7 @@ class App extends Component{
     }else if(unmatchedLetters.includes(letter)){
       return 'letterUnmatched'
     }
+    return 'unPressed'
   }
   
   // Initialisation d'une nouvelle partie + update manche 
@@ -187,7 +157,7 @@ class App extends Component{
   statusGame(){
     const { matchedLetters, missed, searchedWord, lettersToFind } = this.state
 
-    if ((matchedLetters.length === lettersToFind.length) && searchedWord !='') {
+    if ((matchedLetters.length === lettersToFind.length) && searchedWord !=='') {
       this.gameInProgress = false
       return 'win'
     }
@@ -196,6 +166,7 @@ class App extends Component{
       this.gameInProgress = false
       return 'loose'
     }
+    return 'in progress'
   }
 
   render(){

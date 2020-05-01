@@ -14,7 +14,7 @@ KeyBoard.propTypes = {
   feedback: PropTypes.oneOf([
     'letterMatched',
     'letterUnmatched',
-    'unTested'
+    'unPressed'
   ]).isRequired,
   onClick: PropTypes.func.isRequired,
 }

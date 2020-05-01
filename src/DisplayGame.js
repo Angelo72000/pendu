@@ -1,5 +1,6 @@
 import React from 'react'
-// import PropTypes from 'prop-types'
+import PropTypes from 'prop-types'
+import './DisplayGame.css'
 
 import pendu0 from './img/pendu0.png';
 import pendu1 from './img/pendu1.png';
@@ -11,15 +12,10 @@ import pendu4 from './img/pendu4.png';
 function updateImageSrc(missed){
     switch (missed) {
         case 1: return pendu1
-        break;
         case 2: return pendu2
-        break;
         case 3: return pendu3
-        break;
         case 4: return pendu4
-        break;
         default: return pendu0
-        break;
     }
 }
 
@@ -53,7 +49,7 @@ function displayWinOrLoose(missed,searchedWord,statusGame, onClick){
 
     if (statusGame === 'loose') return loose
     
-    return
+    return false
 
 }
 
@@ -63,30 +59,82 @@ function computeDisplay(searchedWord, matchedLetters, missed, maxMissed ) {
     }
 }
  
-const chrono = setTimeout(function(){ chrono(i)}, 1000) 
 
-const DisplayGame = ({numberOfGames, score, searchedWord, missed, matchedLetters, maxMissed, statusGame, onClick}) => (
-    <div className="col-md-7  mx-auto text-center">
-        <section className="jumbotron text-center">
-            <div className="col-md-7  mx-auto text-center">
-                <span>score : {score} / {numberOfGames}</span>
-            </div>    
-            <div className="container">
-                <img src={ updateImageSrc( missed ) } alt="Pendu" className="pendu" />
-                <h1 className="jumbotron-heading">{ computeDisplay( searchedWord, matchedLetters, missed, maxMissed ) }</h1>
-                { displayWinOrLoose(missed,searchedWord,statusGame,onClick) }
-            </div>
-        </section>
-    </div>
-)
+const DisplayGame = ({numberOfGames, score, searchedWord, missed, matchedLetters, maxMissed, statusGame, onClick}) => {
+    
+    const s = (score > 1)?'s':''
+    const pourcentage = Math.round((score / (numberOfGames + score)) * 100)
+    const barStriped=''
+    
+    // switch (pourcentage) {
+    //     case (pourcentage > 50):
+    //          barStriped = 'bg-success'
+    //         break
 
-// KeyBoard.propTypes = {
-//   letter: PropTypes.string.isRequired,
-//   feedback: PropTypes.oneOf([
-//     'letterMatched',
-//     'letterUnmatched',
-//     'unTested'
-//   ]).isRequired,
-//   onClick: PropTypes.func.isRequired,
-// }
+    //     case (pourcentage < 50 && pourcentage > 30):
+    //          barStriped = 'bg-warning'
+    //         break
+
+    //     case (pourcentage < 30):
+    //          barStriped = 'bg-danger'
+    //         break
+    
+    //     default:
+    //         break
+    // }
+console.log(pourcentage)
+    
+    return(
+        <div className="col-md-7  mx-auto text-center">
+            <section className="jumbotron text-center">
+                <div className="row justify-content-md-center">
+                    <div className="col-md 12 mx-auto text-center">
+                        <div>Partie{s} gagnée{s} {score} / {numberOfGames}</div>
+                    </div>    
+                </div>    
+                <div className="mt-3 row justify-content-md-center">
+                    <div className="col-md-10 text-center">
+                        <img src={ updateImageSrc( missed ) } alt="Pendu" className="pendu" />
+                    </div>
+                    <div className="col-md-2">
+                        <div className="mx-auto progress progress-bar-vertical">
+                            <div className={`progress-bar progress-striped ${barStriped}`}  
+                                 role="progressbar" 
+                                //  aria-valuenow={(pourcentage === 0)? 100 : pourcentage} 
+                                 aria-valuenow={pourcentage} 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100" 
+                                //  style={{height: ((pourcentage === 0)? 100 : pourcentage ) + '%'}}> 
+                                 style={{height: pourcentage + '%'}}> 
+                            </div>
+                        </div>                        
+                        <div className="mx-auto text-center pourcentage">Taux de réussite{pourcentage} %</div>
+                    </div>                        
+                </div>          
+                <div className="row justify-content-md-center">
+                    <div className="col-md-10 text-center">
+                        <h1 className="jumbotron-heading">{ computeDisplay( searchedWord, matchedLetters, missed, maxMissed ) }</h1>
+                        { displayWinOrLoose(missed,searchedWord,statusGame,onClick) }
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    )
+}
+
+DisplayGame.propTypes = {
+  numberOfGames: PropTypes.number.isRequired,
+  score: PropTypes.number.isRequired,
+  searchedWord: PropTypes.string.isRequired,
+  missed: PropTypes.number.isRequired,
+  matchedLetters: PropTypes.array.isRequired,
+  maxMissed: PropTypes.number.isRequired,
+  statusGame: PropTypes.oneOf([
+    'win',
+    'loose',
+    'in progress'
+  ]).isRequired,
+  onClick: PropTypes.func.isRequired,
+}
 export default DisplayGame
