@@ -1,21 +1,23 @@
 import React, {Component} from 'react';
 import KeyBoard from './KeyBoard';
-import DisplayGame from './DisplayGame';
+// import DisplayGame from './DisplayGame';
+import DisplayGameApp from './DisplayGameApp';
 import { lettersAllowed, WordsList, allowedInput } from './Settings';
 
 import './App.css';
 
 const tabLetters = lettersAllowed.split('')
 const maxMissed = 4
-const numberOfGames = 0
+const loop = 0
 
 
 class App extends Component{
   constructor(props){
     super(props)
-    this.numberOfGames = numberOfGames
+    this.loop = loop
     this.gameInProgress = true
     this.state = {
+      showingAlert: false,
       searchedWord : '',
       lettersToFind : [],
       matchedLetters : [],
@@ -45,6 +47,20 @@ class App extends Component{
     document.addEventListener('keydown', this.pressKey);
   }
   
+  isAlreadyUsedLetter(matchedLetters, unmatchedLetters, letter){
+    if (matchedLetters.includes(letter) || unmatchedLetters.includes(letter)){
+      this.setState({
+        showingAlert: true
+      });
+      
+      setTimeout(() => {
+        this.setState({
+          showingAlert: false
+        });
+      }, 2000);
+    }
+  }
+
   // Suppression de l'écouteur dévènement keydown  
   componentWillUnmount() {
     document.removeEventListener('keydown', this.pressKey);
@@ -57,6 +73,8 @@ class App extends Component{
     const newScore = (( matchedLetters.length + 1 ) === lettersToFind.length ) ? score + 1 : score 
     const pressedKey = e.key.toUpperCase()
 
+
+    this.isAlreadyUsedLetter(matchedLetters, unmatchedLetters, pressedKey)
     
     // on vérifie si ID de la touche saisie correspond à l'un des ID de touche autorisé
     allowedInput.map((props) =>{
@@ -104,7 +122,9 @@ class App extends Component{
     const { matchedLetters, unmatchedLetters, lettersToFind, missed, score } = this.state
     const newScore = (( matchedLetters.length + 1 ) === lettersToFind.length ) ? score + 1 : score 
     this.gameInProgress = true
-    
+
+    this.isAlreadyUsedLetter(matchedLetters, unmatchedLetters, letter)
+
     if(lettersToFind.includes(letter)){
       matchedLetters.push(letter)
       this.setState({ 
@@ -143,7 +163,7 @@ class App extends Component{
     this.gameInProgress = true
     const searchedWord = this.selectRandomWord()
     const lettersToFind = this.tabLettersToFindInWordSelected(searchedWord)
-    this.numberOfGames = this.numberOfGames + 1
+    this.loop = this.loop + 1
     this.setState({
       searchedWord : searchedWord,
       lettersToFind : lettersToFind,
@@ -172,24 +192,27 @@ class App extends Component{
   render(){
     const { searchedWord, matchedLetters, missed, score } = this.state
 
-    if(this.numberOfGames === 0){
+    if(this.loop === 0){
       this.newGame()
     } 
+
     return(
       <div>
-          <DisplayGame missed={missed} 
+          <DisplayGameApp missed={missed} 
                        searchedWord={searchedWord}
                        matchedLetters={matchedLetters}
                        maxMissed={maxMissed}
                        statusGame={this.statusGame()}
                        onClick={this.newGame}
                        score={score}
-                       numberOfGames={this.numberOfGames}
+                       loop={this.loop}
+                       gameInProgress={this.gameInProgress}
           />
-
-
           <div className="col-md-7  mx-auto text-center">
-            { 
+          <div className={`alert alert-success ${this.state.showingAlert ? 'alert-shown' : 'alert-hidden'}`}>
+            <strong>Cette lettre à déja été utilisée</strong>
+          </div>
+            {
               tabLetters.map((letter, index) => (
                 <KeyBoard
                   letter={letter}

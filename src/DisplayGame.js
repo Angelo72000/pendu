@@ -60,36 +60,42 @@ function computeDisplay(searchedWord, matchedLetters, missed, maxMissed ) {
 }
  
 
-const DisplayGame = ({numberOfGames, score, searchedWord, missed, matchedLetters, maxMissed, statusGame, onClick}) => {
+const DisplayGame = ({numberOfGames, gameInProgress, score, searchedWord, missed, matchedLetters, maxMissed, statusGame, onClick}) => {
     
     const s = (score > 1)?'s':''
-    const pourcentage = Math.round((score / (numberOfGames + score)) * 100)
-    const barStriped=''
+    let color =''
+    let pourcentage = 0
+    let retardateur = false
     
-    // switch (pourcentage) {
-    //     case (pourcentage > 50):
-    //          barStriped = 'bg-success'
-    //         break
-
-    //     case (pourcentage < 50 && pourcentage > 30):
-    //          barStriped = 'bg-warning'
-    //         break
-
-    //     case (pourcentage < 30):
-    //          barStriped = 'bg-danger'
-    //         break
     
-    //     default:
-    //         break
-    // }
-console.log(pourcentage)
+    if(statusGame === 'win'){
+      retardateur = true
+    }else if (statusGame === 'loose') {
+      retardateur = true
+    }else{
+      retardateur = false
+    }
+    
+    if (retardateur) {
+      pourcentage = Math.round((score / numberOfGames) * 100)
+      if ((pourcentage >= 50) && gameInProgress) {
+        color = 'bg-success'
+      }else if(pourcentage < 49 && pourcentage > 25){
+        color = 'bg-warning'
+      }else{
+        color = 'bg-danger'
+      }
+    }
+
+
+
     
     return(
         <div className="col-md-7  mx-auto text-center">
             <section className="jumbotron text-center">
                 <div className="row justify-content-md-center">
                     <div className="col-md 12 mx-auto text-center">
-                        <div>Partie{s} gagnée{s} {score} / {numberOfGames}</div>
+                        <div>Partie{s} remportée{s} : {score} / {numberOfGames}</div>
                     </div>    
                 </div>    
                 <div className="mt-3 row justify-content-md-center">
@@ -98,17 +104,15 @@ console.log(pourcentage)
                     </div>
                     <div className="col-md-2">
                         <div className="mx-auto progress progress-bar-vertical">
-                            <div className={`progress-bar progress-striped ${barStriped}`}  
+                            <div className={"progress-bar progress-striped " + color}
                                  role="progressbar" 
-                                //  aria-valuenow={(pourcentage === 0)? 100 : pourcentage} 
                                  aria-valuenow={pourcentage} 
                                  aria-valuemin="0" 
                                  aria-valuemax="100" 
-                                //  style={{height: ((pourcentage === 0)? 100 : pourcentage ) + '%'}}> 
                                  style={{height: pourcentage + '%'}}> 
                             </div>
                         </div>                        
-                        <div className="mx-auto text-center pourcentage">Taux de réussite{pourcentage} %</div>
+                        <div className="mx-auto text-center pourcentage">Taux de réussite {pourcentage}%</div>
                     </div>                        
                 </div>          
                 <div className="row justify-content-md-center">
