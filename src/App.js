@@ -47,6 +47,11 @@ class App extends Component{
     document.addEventListener('keydown', this.pressKey);
   }
   
+  // Suppression de l'écouteur dévènement keydown  
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.pressKey);
+  }
+
   isAlreadyUsedLetter(matchedLetters, unmatchedLetters, letter){
     if (matchedLetters.includes(letter) || unmatchedLetters.includes(letter)){
       this.setState({
@@ -57,13 +62,10 @@ class App extends Component{
         this.setState({
           showingAlert: false
         });
-      }, 2000);
+      }, 2000)
+      return true 
     }
-  }
-
-  // Suppression de l'écouteur dévènement keydown  
-  componentWillUnmount() {
-    document.removeEventListener('keydown', this.pressKey);
+    return false 
   }
 
   // GESTION DE LA PARTIE AVEC LE CLAVIER
@@ -72,48 +74,46 @@ class App extends Component{
     const { matchedLetters, unmatchedLetters, lettersToFind, missed, score } = this.state
     const newScore = (( matchedLetters.length + 1 ) === lettersToFind.length ) ? score + 1 : score 
     const pressedKey = e.key.toUpperCase()
+    const letterAlreadyUsed =  this.isAlreadyUsedLetter(matchedLetters, unmatchedLetters, pressedKey)
 
-
-    this.isAlreadyUsedLetter(matchedLetters, unmatchedLetters, pressedKey)
-    
     // on vérifie si ID de la touche saisie correspond à l'un des ID de touche autorisé
     allowedInput.map((props) =>{
       if((e.keyCode === props.id)){
   
         const pressEscapeOrEnter = ((props.name === 'enter') || (props.name === 'escape'))?true:false
 
-          // Si la partie est terminée et 'Entrer' ou 'Echape' on relance une game
-          if (pressEscapeOrEnter && !this.gameInProgress) {
-            this.gameInProgress = true
-            this.newGame()
-          }
-          
-          // On vérifie si la partie est toujours en cours et si le tableau de lettre à trouver contient la lettre saisie et on met à jour l'état du jeu
-          if (this.gameInProgress && !pressEscapeOrEnter) {
-            if(lettersToFind.includes(pressedKey)){
-              matchedLetters.push(pressedKey) 
+        // Si la partie est terminée et 'Entrer' ou 'Echape' on relance une game
+        if (pressEscapeOrEnter && !this.gameInProgress) {
+          this.gameInProgress = true
+          this.newGame()
+        }
+        
+        // On vérifie si la partie est toujours en cours et si le tableau de lettre à trouver contient la lettre saisie et on met à jour l'état du jeu
+        if (this.gameInProgress && !pressEscapeOrEnter) {
+          if(lettersToFind.includes(pressedKey) && !letterAlreadyUsed){
+            matchedLetters.push(pressedKey) 
+            this.setState({ 
+              matchedLetters : matchedLetters,
+              score : newScore,
+              currentKey: pressedKey,
+            })
+            
+          }else{
+            // si la lettre saisie n'est ni dans le tableau de lettres à trouver ni dans le tableau de lettres déjà saisie 
+            if(!matchedLetters.includes(pressedKey) && !unmatchedLetters.includes(pressedKey) && !pressEscapeOrEnter){
+              unmatchedLetters.push(pressedKey)
               this.setState({ 
-                matchedLetters : matchedLetters,
+                unmatchedLetters : unmatchedLetters, 
+                missed : missed + 1,
                 score : newScore,
                 currentKey: pressedKey,
               })
-              
-            }else{
-              // si la lettre saisie n'est ni dans le tableau de lettres à trouver ni dans le tableau de lettres déjà saisie 
-              if(!matchedLetters.includes(pressedKey) && !unmatchedLetters.includes(pressedKey) && !pressEscapeOrEnter){
-                unmatchedLetters.push(pressedKey)
-                this.setState({ 
-                  unmatchedLetters : unmatchedLetters, 
-                  missed : missed + 1,
-                  score : newScore,
-                  currentKey: pressedKey,
-                })
-              }
-            }             
-          }
+            }
+          }             
         }
-        return false // Ne retourne rien
-      })// Fin de map allowedInput
+      }
+      return false // Ne retourne rien
+    })// Fin de map allowedInput
 
   }
   
@@ -122,10 +122,9 @@ class App extends Component{
     const { matchedLetters, unmatchedLetters, lettersToFind, missed, score } = this.state
     const newScore = (( matchedLetters.length + 1 ) === lettersToFind.length ) ? score + 1 : score 
     this.gameInProgress = true
-
-    this.isAlreadyUsedLetter(matchedLetters, unmatchedLetters, letter)
-
-    if(lettersToFind.includes(letter)){
+    const letterAlreadyUsed =  this.isAlreadyUsedLetter(matchedLetters, unmatchedLetters, letter)
+    
+    if(lettersToFind.includes(letter) && !letterAlreadyUsed){
       matchedLetters.push(letter)
       this.setState({ 
         matchedLetters : matchedLetters,
@@ -189,8 +188,16 @@ class App extends Component{
     return 'in progress'
   }
 
+  
   render(){
     const { searchedWord, matchedLetters, missed, score } = this.state
+    const alert = (
+        <div className="col-md-7  mx-auto text-center">
+          <div className={`alert alert-warning ${this.state.showingAlert ? 'alert-shown' : 'alert-hidden'}`}>
+            <strong>Cette lettre à déja été utilisée</strong>
+          </div>          
+        </div> ) 
+      
 
     if(this.loop === 0){
       this.newGame()
@@ -199,26 +206,23 @@ class App extends Component{
     return(
       <div>
           <DisplayGameApp missed={missed} 
-                       searchedWord={searchedWord}
-                       matchedLetters={matchedLetters}
-                       maxMissed={maxMissed}
-                       statusGame={this.statusGame()}
-                       onClick={this.newGame}
-                       score={score}
-                       loop={this.loop}
-                       gameInProgress={this.gameInProgress}
+                          searchedWord={searchedWord}
+                          matchedLetters={matchedLetters}
+                          maxMissed={maxMissed}
+                          statusGame={this.statusGame()}
+                          onClick={this.newGame}
+                          score={score}
+                          loop={this.loop}
+                          gameInProgress={this.gameInProgress}
           />
-          <div className="col-md-7  mx-auto text-center">
-          <div className={`alert alert-success ${this.state.showingAlert ? 'alert-shown' : 'alert-hidden'}`}>
-            <strong>Cette lettre à déja été utilisée</strong>
-          </div>
+          {alert}
+          <div className="col-12 col-sm-12 col-md-10 col-lg-9 col-xl-7 mx-auto text-center">
             {
               tabLetters.map((letter, index) => (
-                <KeyBoard
-                  letter={letter}
-                  feedback={this.getFeedbackForLetter(letter)}
-                  key={index}
-                  onClick={this.letterClick}
+                <KeyBoard letter={letter}
+                          feedback={this.getFeedbackForLetter(letter)}
+                          key={index}
+                          onClick={this.letterClick}
                 />
               ))
             }

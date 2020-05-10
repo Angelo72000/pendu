@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import './DisplayGame.css'
+import './DisplayGameApp.css'
 import pendu0 from './img/pendu0.png';
 import pendu1 from './img/pendu1.png';
 import pendu2 from './img/pendu2.png';
@@ -103,18 +103,18 @@ class DisplayGameApp extends Component{
         }
       
         return(
-            <div className="col-md-7  mx-auto text-center">
-                <section className="jumbotron text-center">
+            <div className="col-12 col-sm-12 col-md-10 col-lg-9 col-xl-7  mx-auto text-center">
+                <section className="jumbotron text-center mb-0">
                     <div className="row justify-content-md-center">
                         <div className="col-md 12 mx-auto text-center">
                             <div>Partie{s} remportée{s} : {score} / {numberOfGames}</div>
                         </div>    
                     </div>    
                     <div className="mt-3 row justify-content-md-center">
-                        <div className="col-md-10 text-center">
+                        <div className="col-9 col-sm-10 col-md-10 col-lg-10 col-xl-10 text-center">
                             <img src={ this.updateImageSrc( missed ) } alt="Pendu" className="pendu" />
                         </div>
-                        <div className="col-md-2">
+                        <div className="col-3 col-sm-2 col-md-2 col-lg-2 col-xl-2">
                             <div className="mx-auto progress progress-bar-vertical">
                                 <div className={"progress-bar progress-striped " + color}
                                      role="progressbar" 
