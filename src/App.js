@@ -194,9 +194,10 @@ class App extends Component{
     const alert = (
         <div className="col-md-7  mx-auto text-center">
           <div className={`alert alert-warning ${this.state.showingAlert ? 'alert-shown' : 'alert-hidden'}`}>
-            <strong>Cette lettre à déja été utilisée</strong>
+            <strong>Cette lettre a déja été utilisée</strong>
           </div>          
-        </div> ) 
+        </div> 
+    ) 
       
 
     if(this.loop === 0){
